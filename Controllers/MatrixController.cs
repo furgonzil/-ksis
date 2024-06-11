@@ -1,8 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
+using MatrixProcessor.Services;
+using MatrixProcessor.Models;
 using System;
 using System.Threading.Tasks;
-using MatrixProcessor.Models;
 
 namespace MatrixProcessor.Controllers
 {
@@ -10,81 +10,65 @@ namespace MatrixProcessor.Controllers
     [Route("api/[controller]")]
     public class MatrixController : ControllerBase
     {
-        private readonly ILogger<MatrixController> _logger;
+        private readonly IMatrixService _matrixService;
 
-        public MatrixController(ILogger<MatrixController> logger)
+        public MatrixController(IMatrixService matrixService)
         {
-            _logger = logger;
+            _matrixService = matrixService;
         }
 
         [HttpPost("transpose")]
-        public async Task<IActionResult> Transpose([FromBody] int[,] matrix)
+        public async Task<IActionResult> Transpose([FromBody] TransposeRequest request)
         {
-            if (matrix == null || matrix.GetLength(0) == 0 || matrix.GetLength(1) == 0)
-            {
-                return BadRequest("Matrix cannot be null or empty.");
-            }
             try
             {
-                var matrixModel = new MatrixModel(matrix);
-                var transposed = await matrixModel.TransposeAsync();
-                return Ok(transposed);
+                var transposedMatrix = await _matrixService.TransposeAsync(request.Matrix);
+                return Ok(transposedMatrix);
             }
-            catch (Exception ex)
+            catch (MatrixException ex)
             {
-                _logger.LogError(ex, "Error transposing matrix");
+                return BadRequest(ex.Message);
+            }
+            catch (Exception)
+            {
                 return StatusCode(500, "Internal server error while transposing matrix.");
             }
         }
 
         [HttpPost("determinant")]
-        public async Task<IActionResult> CalculateDeterminant([FromBody] int[,] matrix)
+        public async Task<IActionResult> CalculateDeterminant([FromBody] DeterminantRequest request)
         {
-            if (matrix == null || matrix.GetLength(0) == 0 || matrix.GetLength(1) == 0)
-            {
-                return BadRequest("Matrix cannot be null or empty.");
-            }
-
             try
             {
-                var matrixModel = new MatrixModel(matrix);
-                var determinant = await matrixModel.CalculateDeterminantAsync();
+                var determinant = await _matrixService.CalculateDeterminantAsync(request.Matrix);
                 return Ok(determinant);
             }
-            catch (Exception ex)
+            catch (MatrixException ex)
             {
-                _logger.LogError(ex, "Error calculating determinant");
+                return BadRequest(ex.Message);
+            }
+            catch (Exception)
+            {
                 return StatusCode(500, "Internal server error while calculating determinant.");
             }
         }
 
         [HttpPost("multiply")]
-        public async Task<IActionResult> Multiply([FromBody] MatrixMultiplicationRequest request)
+        public async Task<IActionResult> Multiply([FromBody] MultiplicationRequest request)
         {
-            if (request.MatrixA == null || request.MatrixB == null ||
-                request.MatrixA.GetLength(0) == 0 || request.MatrixA.GetLength(1) == 0 ||
-                request.MatrixB.GetLength(0) == 0 || request.MatrixB.GetLength(1) == 0)
-            {
-                return BadRequest("Matrices cannot be null or empty.");
-            }
-
             try
             {
-                var matrixModel = new MatrixModel(request.MatrixA);
-                var result = await matrixModel.MultiplyAsync(request.MatrixB);
+                var result = await _matrixService.MultiplyAsync(request.MatrixA, request.MatrixB);
                 return Ok(result);
             }
-            catch (Exception ex)
+            catch (MatrixException ex)
             {
-                _logger.LogError(ex, "Error multiplying matrices");
+                return BadRequest(ex.Message);
+            }
+            catch (Exception)
+            {
                 return StatusCode(500, "Internal server error while multiplying matrices.");
             }
         }
-    }
-
-    public class MatrixMultiplicationRequest
-    {
-        public int[,]? MatrixA { get; set; }  // Сделаем свойства nullable
-        public int[,]? MatrixB { get; set; }  // Сделаем свойства nullable
     }
 }

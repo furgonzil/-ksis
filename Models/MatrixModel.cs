@@ -1,47 +1,46 @@
 using System;
-using System.Threading.Tasks;
 
 namespace MatrixProcessor.Models
 {
-    public class MatrixModel
+    public class MatrixException : Exception
     {
-        public int[,] Matrix { get; set; }
+        public MatrixException(string message) : base(message) { }
+    }
 
-        public MatrixModel(int[,] matrix)
-        {
-            Matrix = matrix ?? throw new ArgumentNullException(nameof(matrix));
-        }
+    public interface IMatrixOperations
+    {
+        int[,] Transpose(int[,] matrix);
+        int CalculateDeterminant(int[,] matrix);
+        int[,] Multiply(int[,] matrixA, int[,] matrixB);
+    }
 
-        public async Task<int[,]> TransposeAsync()
+    public class MatrixOperations : IMatrixOperations
+    {
+        public int[,] Transpose(int[,] matrix)
         {
-            return await Task.Run(() =>
+            if (matrix == null)
+                throw new MatrixException("Matrix cannot be null.");
+
+            int rows = matrix.GetLength(0);
+            int cols = matrix.GetLength(1);
+            int[,] transposed = new int[cols, rows];
+
+            for (int i = 0; i < rows; i++)
             {
-                int rows = Matrix.GetLength(0);
-                int cols = Matrix.GetLength(1);
-                int[,] transposed = new int[cols, rows];
-
-                for (int i = 0; i < rows; i++)
+                for (int j = 0; j < cols; j++)
                 {
-                    for (int j = 0; j < cols; j++)
-                    {
-                        transposed[j, i] = Matrix[i, j];
-                    }
+                    transposed[j, i] = matrix[i, j];
                 }
+            }
 
-                return transposed;
-            });
+            return transposed;
         }
 
-        public async Task<int> CalculateDeterminantAsync()
-        {
-            return await Task.Run(() => CalculateDeterminant(Matrix));
-        }
-
-        private int CalculateDeterminant(int[,] matrix)
+        public int CalculateDeterminant(int[,] matrix)
         {
             int n = matrix.GetLength(0);
             if (n != matrix.GetLength(1))
-                throw new InvalidOperationException("Matrix must be square to calculate determinant.");
+                throw new MatrixException("Matrix must be square to calculate determinant.");
 
             if (n == 1)
                 return matrix[0, 0];
@@ -63,18 +62,14 @@ namespace MatrixProcessor.Models
                         colIndex++;
                     }
                 }
+
                 determinant += (p % 2 == 0 ? 1 : -1) * matrix[0, p] * CalculateDeterminant(subMatrix);
             }
 
             return determinant;
         }
 
-        public async Task<int[,]> MultiplyAsync(int[,] otherMatrix)
-        {
-            return await Task.Run(() => Multiply(Matrix, otherMatrix));
-        }
-
-        private int[,] Multiply(int[,] matrixA, int[,] matrixB)
+        public int[,] Multiply(int[,] matrixA, int[,] matrixB)
         {
             int aRows = matrixA.GetLength(0);
             int aCols = matrixA.GetLength(1);
@@ -82,7 +77,7 @@ namespace MatrixProcessor.Models
             int bCols = matrixB.GetLength(1);
 
             if (aCols != bRows)
-                throw new InvalidOperationException("Number of columns in the first matrix must match the number of rows in the second matrix.");
+                throw new MatrixException("Number of columns in the first matrix must match the number of rows in the second matrix.");
 
             int[,] result = new int[aRows, bCols];
 

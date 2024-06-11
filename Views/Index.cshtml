@@ -1,0 +1,39 @@
+﻿@page
+@model MatrixProcessor.Pages.IndexModel
+
+@{
+    ViewData["Title"] = "Matrix Processor";
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Matrix Processor</title>
+    <link href="https://fonts.googleapis.com/css2?family=Mukta:wght@200;300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="~/css/styles.css">
+</head>
+<body>
+    <header>
+        <h1>Matrix Processor</h1>
+    </header>
+    <main>
+        <section id="matrix-input">
+            <h2>Enter Matrix</h2>
+            <textarea id="matrix-input-text" placeholder="Enter matrix here..."></textarea>
+            <button id="transpose-btn">Transpose</button>
+            <button id="determinant-btn">Calculate Determinant</button>
+            <button id="multiply-btn">Multiply</button>
+        </section>
+        <section id="result">
+            <h2>Result</h2>
+            <div id="result-text"></div>
+        </section>
+    </main>
+    <footer>
+        <p>&copy; 2024 Matrix Processor</p>
+    </footer>
+    <script src="~/js/script.js"></script>
+</body>
+</html>
