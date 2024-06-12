@@ -49,26 +49,43 @@
 
         <div class="row matrix-input">
             <div class="col-md-3">
-                <input type="number" id="rows" class="form-control" placeholder="Rows" required>
+                <input type="number" id="rowsA" class="form-control" placeholder="Rows" required>
             </div>
             <div class="col-md-3">
-                <input type="number" id="cols" class="form-control" placeholder="Columns" required>
+                <input type="number" id="colsA" class="form-control" placeholder="Columns" required>
             </div>
             <div class="col-md-6">
-                <button id="generateMatrix" class="btn btn-primary btn-block">
-                    <i class="material-icons">grid_on</i> Generate Matrix
+                <button id="generateMatrixA" class="btn btn-primary btn-block">
+                    <i class="material-icons">grid_on</i> Generate Matrix A
                 </button>
             </div>
         </div>
 
-        <table id="matrixInput" class="table table-bordered">
+        <table id="matrixInputA" class="table table-bordered">
+            <tbody></tbody>
+        </table>
+
+        <div class="row matrix-input">
+            <div class="col-md-3">
+                <input type="number" id="rowsB" class="form-control" placeholder="Rows" required>
+            </div>
+            <div class="col-md-3">
+                <input type="number" id="colsB" class="form-control" placeholder="Columns" required>
+            </div>
+            <div class="col-md-6">
+                <button id="generateMatrixB" class="btn btn-primary btn-block">
+                    <i class="material-icons">grid_on</i> Generate Matrix B
+                </button>
+            </div>
+
+        <table id="matrixInputB" class="table table-bordered">
             <tbody></tbody>
         </table>
 
         <div class="row mt-3">
             <div class="col-md-4">
                 <form id="transposeForm">
-                    <input type="hidden" name="TransposeRequest.Matrix" id="transposeMatrixInput">
+                    <input type="hidden" name="Matrix" id="transposeMatrixInput">
                     <button type="submit" id="transposeMatrix" class="btn btn-success btn-icon btn-block">
                         <i class="material-icons">swap_horiz</i> Transpose
                     </button>
@@ -76,7 +93,7 @@
             </div>
             <div class="col-md-4">
                 <form id="determinantForm">
-                    <input type="hidden" name="DeterminantRequest.Matrix" id="determinantMatrixInput">
+                    <input type="hidden" name="Matrix" id="determinantMatrixInput">
                     <button type="submit" id="calculateDeterminant" class="btn btn-info btn-icon btn-block">
                         <i class="material-icons">calculate</i> Determinant
                     </button>
@@ -84,8 +101,8 @@
             </div>
             <div class="col-md-4">
                 <form id="multiplyForm">
-                    <input type="hidden" name="MultiplyRequest.MatrixA" id="multiplyMatrixAInput">
-                    <input type="hidden" name="MultiplyRequest.MatrixB" id="multiplyMatrixBInput">
+                    <input type="hidden" name="MatrixA" id="multiplyMatrixAInput">
+                    <input type="hidden" name="MatrixB" id="multiplyMatrixBInput">
                     <button type="submit" id="multiplyMatrices" class="btn btn-warning btn-icon btn-block">
                         <i class="material-icons">clear</i> Multiply
                     </button>
@@ -114,8 +131,8 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        function addRowsAndCols(rows, cols) {
-            var tableBody = $('#matrixInput tbody');
+        function addRowsAndCols(tableId, rows, cols) {
+            var tableBody = $(tableId + ' tbody');
             tableBody.empty();
             for (var i = 0; i < rows; i++) {
                 var row = $('<tr></tr>');
@@ -127,24 +144,34 @@
             }
         }
 
-        $('#generateMatrix').on('click', function() {
-            var rows = parseInt($('#rows').val());
-            var cols = parseInt($('#cols').val());
+        $('#generateMatrixA').on('click', function() {
+            var rows = parseInt($('#rowsA').val());
+            var cols = parseInt($('#colsA').val());
             if (isNaN(rows) || isNaN(cols) || rows <= 0 || cols <= 0) {
                 alert('Please enter valid positive numbers for rows and columns.');
                 return;
             }
-            addRowsAndCols(rows, cols);
+            addRowsAndCols('#matrixInputA', rows, cols);
         });
 
-        function getMatrix() {
+        $('#generateMatrixB').on('click', function() {
+            var rows = parseInt($('#rowsB').val());
+            var cols = parseInt($('#colsB').val());
+            if (isNaN(rows) || isNaN(cols) || rows <= 0 || cols <= 0) {
+                alert('Please enter valid positive numbers for rows and columns.');
+                return;
+            }
+            addRowsAndCols('#matrixInputB', rows, cols);
+        });
+
+        function getMatrix(tableId) {
             var matrix = [];
-            var rows = $('#matrixInput tbody tr').length;
-            var cols = $('#matrixInput tbody tr:first td').length;
+            var rows = $(tableId + ' tbody tr').length;
+            var cols = $(tableId + ' tbody tr:first td').length;
             for (var i = 0; i < rows; i++) {
                 var row = [];
                 for (var j = 0; j < cols; j++) {
-                    var value = parseFloat($('#matrixInput tbody tr:eq(' + i + ') td:eq(' + j + ') input').val());
+                    var value = parseFloat($(tableId + ' tbody tr:eq(' + i + ') td:eq(' + j + ') input').val());
                     if (isNaN(value)) {
                         alert('Please enter valid numbers in the matrix.');
                         return null;
@@ -156,74 +183,47 @@
             return matrix;
         }
 
-        function setMatrixHiddenField(matrix, hiddenFieldId) {
-            $(hiddenFieldId).val(JSON.stringify(matrix));
+        function sendAjaxRequest(url, data) {
+            $.ajax({
+                type: "POST",
+                url: url,
+                contentType: "application/json",
+                data: JSON.stringify(data),
+                success: function(response) {
+                    $('#result').text(JSON.stringify(response, null, 2));
+                    $('#resultModal').modal('show');
+                },
+                error: function(xhr, status, error) {
+                    console.error('AJAX Error:', status, xhr.responseText);
+                }
+            });
         }
 
         $('#transposeForm').on('submit', function(event) {
             event.preventDefault();
-            var matrix = getMatrix();
+            var matrix = getMatrix('#matrixInputA');
             if (matrix) {
-                setMatrixHiddenField(matrix, '#transposeMatrixInput');
-                // Отправка данных на сервер с помощью AJAX
-                $.ajax({
-                    type: 'POST',
-                    url: '/Index?handler=TransposeMatrix',
-                    data: $(this).serialize(),
-                    success: function(response) {
-                        $('#result').text(response);
-                        $('#resultModal').modal('show');
-                    },
-                    error: function(xhr, status, error) {
-                        $('#result').text('Error: ' + error);
-                        $('#resultModal').modal('show');
-                    }
-                });
+                var data = { Matrix: matrix };
+                sendAjaxRequest('@Url.Page("/Index", "OnPostTransposeMatrix")', data);
             }
         });
 
         $('#determinantForm').on('submit', function(event) {
             event.preventDefault();
-            var matrix = getMatrix();
+            var matrix = getMatrix('#matrixInputA');
             if (matrix) {
-                setMatrixHiddenField(matrix, '#determinantMatrixInput');
-                // Отправка данных на сервер с помощью AJAX
-                $.ajax({
-                    type: 'POST',
-                    url: '/Index?handler=CalculateDeterminant',
-                    data: $(this).serialize(),
-                    success: function(response) {
-                        $('#result').text(response);
-                        $('#resultModal').modal('show');
-                    },
-                    error: function(xhr, status, error) {
-                        $('#result').text('Error: ' + error);
-                        $('#resultModal').modal('show');
-                    }
-                });
+                var data = { Matrix: matrix };
+                sendAjaxRequest('@Url.Page("/Index", "OnPostDeterminantMatrix")', data);
             }
         });
 
         $('#multiplyForm').on('submit', function(event) {
             event.preventDefault();
-            var matrix = getMatrix();
-            if (matrix) {
-                setMatrixHiddenField(matrix, '#multiplyMatrixAInput');
-                setMatrixHiddenField(matrix, '#multiplyMatrixBInput');
-                // Отправка данных на сервер с помощью AJAX
-                $.ajax({
-                    type: 'POST',
-                    url: '/Index?handler=MultiplyMatrices',
-                    data: $(this).serialize(),
-                    success: function(response) {
-                        $('#result').text(response);
-                        $('#resultModal').modal('show');
-                    },
-                    error: function(xhr, status, error) {
-                        $('#result').text('Error: ' + error);
-                        $('#resultModal').modal('show');
-                    }
-                });
+            var matrixA = getMatrix('#matrixInputA');
+            var matrixB = getMatrix('#matrixInputB');
+            if (matrixA && matrixB) {
+                var data = { MatrixA: matrixA, MatrixB: matrixB };
+                sendAjaxRequest('@Url.Page("/Index", "OnPostMultiplyMatrices")', data);
             }
         });
     </script>
