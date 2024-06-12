@@ -1,8 +1,10 @@
 {
   "version": 2,
-  "dgSpecHash": "UeH7QMEPM04=",
+  "dgSpecHash": "h8bNG45RCr8=",
   "success": true,
   "projectFilePath": "/Users/ivan/Desktop/MatrixProcessor/MatrixProcessor.csproj",
-  "expectedPackageFiles": [],
+  "expectedPackageFiles": [
+    "/Users/ivan/.nuget/packages/newtonsoft.json/13.0.1/newtonsoft.json.13.0.1.nupkg.sha512"
+  ],
   "logs": []
 }

@@ -245,14 +245,6 @@
       "PackagePath": "staticwebassets/lib/jquery/dist/jquery.min.map"
     },
     {
-      "Id": "/Users/ivan/Desktop/MatrixProcessor/wwwroot/script.js",
-      "PackagePath": "staticwebassets/script.js"
-    },
-    {
-      "Id": "/Users/ivan/Desktop/MatrixProcessor/wwwroot/styles.css",
-      "PackagePath": "staticwebassets/styles.css"
-    },
-    {
       "Id": "obj/Debug/net8.0/staticwebassets/msbuild.MatrixProcessor.Microsoft.AspNetCore.StaticWebAssets.props",
       "PackagePath": "build\\Microsoft.AspNetCore.StaticWebAssets.props"
     },

@@ -59,3 +59,6 @@
 /Users/ivan/Desktop/MatrixProcessor/obj/Debug/net8.0/MatrixProcessor.pdb
 /Users/ivan/Desktop/MatrixProcessor/obj/Debug/net8.0/MatrixProcessor.genruntimeconfig.cache
 /Users/ivan/Desktop/MatrixProcessor/obj/Debug/net8.0/ref/MatrixProcessor.dll
+/Users/ivan/Desktop/MatrixProcessor/bin/Debug/net8.0/Newtonsoft.Json.dll
+/Users/ivan/Desktop/MatrixProcessor/obj/Debug/net8.0/MatrixProcessor.csproj.AssemblyReference.cache
+/Users/ivan/Desktop/MatrixProcessor/obj/Debug/net8.0/MatrixPr.7A4AC8BB.Up2Date

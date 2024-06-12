@@ -1,6 +1,6 @@
 {
   "Version": 1,
-  "Hash": "7eclwigCVrkIPlIv4XmWsGP0Wmh29u0pQB7RV4nIVs8=",
+  "Hash": "dFR6IwwWhqU2ZPL4y0DmFI3hacCoB01Zw2YtH3Scf4k=",
   "Source": "MatrixProcessor",
   "BasePath": "_content/MatrixProcessor",
   "Mode": "Default",
@@ -1193,44 +1193,6 @@
       "CopyToOutputDirectory": "Never",
       "CopyToPublishDirectory": "PreserveNewest",
       "OriginalItemSpec": "wwwroot/lib/jquery/LICENSE.txt"
-    },
-    {
-      "Identity": "/Users/ivan/Desktop/MatrixProcessor/wwwroot/script.js",
-      "SourceId": "MatrixProcessor",
-      "SourceType": "Discovered",
-      "ContentRoot": "/Users/ivan/Desktop/MatrixProcessor/wwwroot/",
-      "BasePath": "_content/MatrixProcessor",
-      "RelativePath": "script.js",
-      "AssetKind": "All",
-      "AssetMode": "All",
-      "AssetRole": "Primary",
-      "AssetMergeBehavior": "PreferTarget",
-      "AssetMergeSource": "",
-      "RelatedAsset": "",
-      "AssetTraitName": "",
-      "AssetTraitValue": "",
-      "CopyToOutputDirectory": "Never",
-      "CopyToPublishDirectory": "PreserveNewest",
-      "OriginalItemSpec": "wwwroot/script.js"
-    },
-    {
-      "Identity": "/Users/ivan/Desktop/MatrixProcessor/wwwroot/styles.css",
-      "SourceId": "MatrixProcessor",
-      "SourceType": "Discovered",
-      "ContentRoot": "/Users/ivan/Desktop/MatrixProcessor/wwwroot/",
-      "BasePath": "_content/MatrixProcessor",
-      "RelativePath": "styles.css",
-      "AssetKind": "All",
-      "AssetMode": "All",
-      "AssetRole": "Primary",
-      "AssetMergeBehavior": "PreferTarget",
-      "AssetMergeSource": "",
-      "RelatedAsset": "",
-      "AssetTraitName": "",
-      "AssetTraitValue": "",
-      "CopyToOutputDirectory": "Never",
-      "CopyToPublishDirectory": "PreserveNewest",
-      "OriginalItemSpec": "wwwroot/styles.css"
     }
   ]
 }

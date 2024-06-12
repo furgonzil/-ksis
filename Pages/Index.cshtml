@@ -1,0 +1,231 @@
+﻿@page
+@model MatrixProcessor.Pages.IndexModel
+@{
+    ViewData["Title"] = "Matrix Processor";
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Matrix Processor</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    <style>
+        .matrix-input {
+            margin-bottom: 20px;
+        }
+        .table-bordered {
+            border-color: #dee2e6;
+        }
+        .table-bordered th, .table-bordered td {
+            border-color: #dee2e6;
+        }
+        .btn-icon {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .btn-icon .material-icons {
+            margin-right: 8px;
+        }
+        .btn-block {
+            width: 100%;
+        }
+        .main-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container main-container">
+        <h1 class="header">Matrix Processor</h1>
+
+        <div class="row matrix-input">
+            <div class="col-md-3">
+                <input type="number" id="rows" class="form-control" placeholder="Rows" required>
+            </div>
+            <div class="col-md-3">
+                <input type="number" id="cols" class="form-control" placeholder="Columns" required>
+            </div>
+            <div class="col-md-6">
+                <button id="generateMatrix" class="btn btn-primary btn-block">
+                    <i class="material-icons">grid_on</i> Generate Matrix
+                </button>
+            </div>
+        </div>
+
+        <table id="matrixInput" class="table table-bordered">
+            <tbody></tbody>
+        </table>
+
+        <div class="row mt-3">
+            <div class="col-md-4">
+                <form id="transposeForm">
+                    <input type="hidden" name="TransposeRequest.Matrix" id="transposeMatrixInput">
+                    <button type="submit" id="transposeMatrix" class="btn btn-success btn-icon btn-block">
+                        <i class="material-icons">swap_horiz</i> Transpose
+                    </button>
+                </form>
+            </div>
+            <div class="col-md-4">
+                <form id="determinantForm">
+                    <input type="hidden" name="DeterminantRequest.Matrix" id="determinantMatrixInput">
+                    <button type="submit" id="calculateDeterminant" class="btn btn-info btn-icon btn-block">
+                        <i class="material-icons">calculate</i> Determinant
+                    </button>
+                </form>
+            </div>
+            <div class="col-md-4">
+                <form id="multiplyForm">
+                    <input type="hidden" name="MultiplyRequest.MatrixA" id="multiplyMatrixAInput">
+                    <input type="hidden" name="MultiplyRequest.MatrixB" id="multiplyMatrixBInput">
+                    <button type="submit" id="multiplyMatrices" class="btn btn-warning btn-icon btn-block">
+                        <i class="material-icons">clear</i> Multiply
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for result -->
+    <div class="modal fade" id="resultModal" tabindex="-1" role="dialog" aria-labelledby="resultModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="resultModalLabel">Result</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <pre id="result"></pre>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function addRowsAndCols(rows, cols) {
+            var tableBody = $('#matrixInput tbody');
+            tableBody.empty();
+            for (var i = 0; i < rows; i++) {
+                var row = $('<tr></tr>');
+                for (var j = 0; j < cols; j++) {
+                    var cell = $('<td><input type="number" class="form-control"></td>');
+                    row.append(cell);
+                }
+                tableBody.append(row);
+            }
+        }
+
+        $('#generateMatrix').on('click', function() {
+            var rows = parseInt($('#rows').val());
+            var cols = parseInt($('#cols').val());
+            if (isNaN(rows) || isNaN(cols) || rows <= 0 || cols <= 0) {
+                alert('Please enter valid positive numbers for rows and columns.');
+                return;
+            }
+            addRowsAndCols(rows, cols);
+        });
+
+        function getMatrix() {
+            var matrix = [];
+            var rows = $('#matrixInput tbody tr').length;
+            var cols = $('#matrixInput tbody tr:first td').length;
+            for (var i = 0; i < rows; i++) {
+                var row = [];
+                for (var j = 0; j < cols; j++) {
+                    var value = parseFloat($('#matrixInput tbody tr:eq(' + i + ') td:eq(' + j + ') input').val());
+                    if (isNaN(value)) {
+                        alert('Please enter valid numbers in the matrix.');
+                        return null;
+                    }
+                    row.push(value);
+                }
+                matrix.push(row);
+            }
+            return matrix;
+        }
+
+        function setMatrixHiddenField(matrix, hiddenFieldId) {
+            $(hiddenFieldId).val(JSON.stringify(matrix));
+        }
+
+        $('#transposeForm').on('submit', function(event) {
+            event.preventDefault();
+            var matrix = getMatrix();
+            if (matrix) {
+                setMatrixHiddenField(matrix, '#transposeMatrixInput');
+                // Отправка данных на сервер с помощью AJAX
+                $.ajax({
+                    type: 'POST',
+                    url: '/Index?handler=TransposeMatrix',
+                    data: $(this).serialize(),
+                    success: function(response) {
+                        $('#result').text(response);
+                        $('#resultModal').modal('show');
+                    },
+                    error: function(xhr, status, error) {
+                        $('#result').text('Error: ' + error);
+                        $('#resultModal').modal('show');
+                    }
+                });
+            }
+        });
+
+        $('#determinantForm').on('submit', function(event) {
+            event.preventDefault();
+            var matrix = getMatrix();
+            if (matrix) {
+                setMatrixHiddenField(matrix, '#determinantMatrixInput');
+                // Отправка данных на сервер с помощью AJAX
+                $.ajax({
+                    type: 'POST',
+                    url: '/Index?handler=CalculateDeterminant',
+                    data: $(this).serialize(),
+                    success: function(response) {
+                        $('#result').text(response);
+                        $('#resultModal').modal('show');
+                    },
+                    error: function(xhr, status, error) {
+                        $('#result').text('Error: ' + error);
+                        $('#resultModal').modal('show');
+                    }
+                });
+            }
+        });
+
+        $('#multiplyForm').on('submit', function(event) {
+            event.preventDefault();
+            var matrix = getMatrix();
+            if (matrix) {
+                setMatrixHiddenField(matrix, '#multiplyMatrixAInput');
+                setMatrixHiddenField(matrix, '#multiplyMatrixBInput');
+                // Отправка данных на сервер с помощью AJAX
+                $.ajax({
+                    type: 'POST',
+                    url: '/Index?handler=MultiplyMatrices',
+                    data: $(this).serialize(),
+                    success: function(response) {
+                        $('#result').text(response);
+                        $('#resultModal').modal('show');
+                    },
+                    error: function(xhr, status, error) {
+                        $('#result').text('Error: ' + error);
+                        $('#resultModal').modal('show');
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html>

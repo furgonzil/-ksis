@@ -18,38 +18,30 @@ namespace MatrixProcessor.Controllers
         }
 
         [HttpPost("transpose")]
-        public async Task<IActionResult> Transpose([FromBody] TransposeRequest request)
+        public async Task<IActionResult> TransposeMatrix([FromBody] int[][] matrix)
         {
             try
             {
-                var transposedMatrix = await _matrixService.TransposeAsync(request.Matrix);
+                var transposedMatrix = await _matrixService.TransposeAsync(matrix);
                 return Ok(transposedMatrix);
             }
-            catch (MatrixException ex)
+            catch (Exception ex)
             {
-                return BadRequest(ex.Message);
-            }
-            catch (Exception)
-            {
-                return StatusCode(500, "Internal server error while transposing matrix.");
+                return HandleException(ex);
             }
         }
 
         [HttpPost("determinant")]
-        public async Task<IActionResult> CalculateDeterminant([FromBody] DeterminantRequest request)
+        public async Task<IActionResult> CalculateDeterminant([FromBody] int[][] matrix)
         {
             try
             {
-                var determinant = await _matrixService.CalculateDeterminantAsync(request.Matrix);
+                var determinant = await _matrixService.CalculateDeterminantAsync(matrix);
                 return Ok(determinant);
             }
-            catch (MatrixException ex)
+            catch (Exception ex)
             {
-                return BadRequest(ex.Message);
-            }
-            catch (Exception)
-            {
-                return StatusCode(500, "Internal server error while calculating determinant.");
+                return HandleException(ex);
             }
         }
 
@@ -61,14 +53,20 @@ namespace MatrixProcessor.Controllers
                 var result = await _matrixService.MultiplyAsync(request.MatrixA, request.MatrixB);
                 return Ok(result);
             }
-            catch (MatrixException ex)
+            catch (Exception ex)
             {
-                return BadRequest(ex.Message);
+                return HandleException(ex);
             }
-            catch (Exception)
+        }
+
+        private IActionResult HandleException(Exception ex)
+        {
+            if (ex is MatrixException matrixException)
             {
-                return StatusCode(500, "Internal server error while multiplying matrices.");
+                return BadRequest(matrixException.Message);
             }
+
+            return StatusCode(500, "Internal server error.");
         }
     }
 }
